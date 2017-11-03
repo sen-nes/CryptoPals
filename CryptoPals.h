@@ -1,10 +1,21 @@
+#pragma once
+
 #include <string>
+#include <vector>
+
+
+struct Res {
+   std::string hexString;
+   std::vector<unsigned char> hex;
+};
+
 
 class CryptoPals {
 public:
    CryptoPals() {}
-   
-   std::string StringToHex(const std::string&);
-   std::string Base64Encode(const std::string&);
-   std::string Base64Decode(const std::string&);
+
+   Res StringToHex(const std::string&);
+   std::string HexBase64Encode(const std::string&);
+   std::string HexBase64Decode(const std::string&);
+   std::vector<unsigned char> HexStringToVector(const std::string&);
 };
