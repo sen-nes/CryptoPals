@@ -1,85 +1,100 @@
 #include "CryptoPals.h"
 
+#include <iostream>
 #include <string>
 #include <vector>
 
+using std::cout;
+using std::endl;
 using std::string;
 using std::vector;
 
-Res
-CryptoPals::StringToHex(const string& in)
+string
+CryptoPals::HexEncode(const string& in)
 {
    const char *hexChars = "0123456789ABCDEF";
-   Res out;
-   out.hexString.reserve(in.size() * 2);
+
+   string out;
+   out.reserve(in.size() * 2); // + 1
    for (int i = 0; i < in.size(); ++i)
    {
       const unsigned char c = in[i];
-      out.hexString.push_back(hexChars[c >> 4]);
-      out.hex.push_back(c >> 4);
-      out.hexString.push_back(hexChars[c & 15]);
-      out.hex.push_back(c & 15);
+      out.push_back(hexChars[c >> 4]);
+      out.push_back(hexChars[c & 15]);
    }
 
    return out;
 }
 
 
-#include <iostream>
-using std::cout;
-using std::endl;
-
-vector<unsigned char>
-CryptoPals::HexStringToVector(const string& in)
+string
+CryptoPals::HexDecode(const string& in)
 {
-   vector<unsigned char> hex(in.size());
+   string hex;
+   hex.reserve(in.size());
    for (int i = 0; i < in.size(); ++i)
    {
-      unsigned char tmp = in[i] - 48;
-      if (tmp > 9) {
-         tmp = in[i] - 87;
+      unsigned char c = in[i];
+      c -= 48;
+      if (c > 9) {
+         c -= 7; 
+         if (c > 15) {
+            c -= 32;
+         }
       }
-      hex[i] = tmp;
+
+      hex.push_back(c);
    }
 
-   return hex;
+   string out;
+   for (int i = 1; i < hex.size(); i += 2)
+   {
+      out.push_back(((hex[i - 1] << 4) | (hex[i])));
+   }
+
+   return out;
 }
 
 
 string
-CryptoPals::HexBase64Encode(const string& inS)
+CryptoPals::HexToBase64(const string& in)
 {
    const char *base64Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
                              "abcdefghijklmnopqrstuvwxyz"
                              "0123456789";
 
-   vector<unsigned char> in = HexStringToVector(inS);
+   string hexDecode = HexDecode(in);
    string out;
    // out.reserve(in.size())
-   for (int i = 2; i < in.size(); i += 3)
+   for (int i = 2; i < hexDecode.size(); i += 3)
    {
-      const unsigned char a = in[i - 2];
-      const unsigned char b = in[i - 1];
-      const unsigned char c = in[i];
+      const unsigned char a = hexDecode[i - 2];
+      const unsigned char b = hexDecode[i - 1];
+      const unsigned char c = hexDecode[i];
 
-      out.push_back(base64Chars[(a << 2) | (b >> 2)]);
-      out.push_back(base64Chars[((b & 3) << 4) | (c)]);
+      out.push_back(base64Chars[a >> 2]);
+      out.push_back(base64Chars[((a & 3) << 4) | (b >> 4)]);
+      out.push_back(base64Chars[((b & 15) << 2) | (c >> 6)]);
+      out.push_back(base64Chars[c & 63]);
    }
 
-   if (in.size() % 3 != 0) {
+   // TODO: REWORK 
+   if (hexDecode.size() % 3 != 0) {
       unsigned char a = 0;
       unsigned char b = 0;
-      if (in.size() % 3 == 1) {
-         a = in[in.size() - 2];
-         b = in[in.size() - 1];
+      if (hexDecode.size() % 3 == 1) {
+         a = hexDecode[hexDecode.size() - 2];
+         b = hexDecode[hexDecode.size() - 1];
       } else {
-         a = in[in.size() - 1];
+         a = hexDecode[hexDecode.size() - 1];
          b = 0;
       }
       const unsigned char c = 0;
    
-      out.push_back(base64Chars[(a << 2) | (b >> 2)]);
-      out.push_back(base64Chars[((b & 3) << 4) | (c)]);
+      out.push_back(base64Chars[a >> 2]);
+      out.push_back(base64Chars[((a & 3) << 4) | (b >> 4)]);
+      out.push_back(base64Chars[((b & 15) << 2) | (c >> 6)]);
+      out.push_back(base64Chars[c & 63]);
    }
 
    return out;

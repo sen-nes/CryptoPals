@@ -4,18 +4,12 @@
 #include <vector>
 
 
-struct Res {
-   std::string hexString;
-   std::vector<unsigned char> hex;
-};
-
-
 class CryptoPals {
 public:
    CryptoPals() {}
 
-   Res StringToHex(const std::string&);
-   std::string HexBase64Encode(const std::string&);
-   std::string HexBase64Decode(const std::string&);
-   std::vector<unsigned char> HexStringToVector(const std::string&);
+   std::string HexEncode(const std::string&);
+   std::string HexDecode(const std::string&);
+   std::string HexToBase64(const std::string&);
+   std::string Base64ToHex(const std::string&);
 };
