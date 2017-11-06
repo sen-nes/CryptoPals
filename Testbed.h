@@ -6,12 +6,18 @@
 #include <string>
 #include <vector>
 #include <exception>
+#include <fstream>
+#include <sstream>
 
 using std::cout;
 using std::endl;
 using std::string;
 using std::vector;
 using std::runtime_error;
+using std::ifstream;
+using std::ios;
+using std::istreambuf_iterator;
+using std::istringstream;
 
 
 bool
@@ -318,6 +324,71 @@ TestSingleByteXOR()
 }
 
 
+bool TestXORFile()
+{
+   string test = "TestXORFile";
+   bool pass = false;
+
+   cout << "*** Preparing for test " << test << "... ***" << endl;
+
+   ifstream file;
+   file.open("./tmp/task4.in", ios::in);
+
+   if(!file)
+   {
+      cout << "Cannot open file." << endl;
+      return false;
+   }
+
+   CryptoPals *cp = new CryptoPals();
+
+   cout << "SCANNING FILE..." << endl;
+   string strings((istreambuf_iterator<char>(file)),
+                  istreambuf_iterator<char>());
+   istringstream iss(strings);
+
+   double bestCoverage = 0.0f;
+   string best;
+   unsigned char bestCipher;
+
+   cout << "*** Done preparing for test " << test << " ***" << endl;
+
+   cout << "*** Running test " << test << "... ***" << endl;
+
+   cout << "PRINTING 75+% COVERAGE" << endl;
+   int count = 0;
+   string tmp;
+   while (getline(iss, tmp))
+   {
+      unsigned char cipher = cp->ScoreText(tmp);
+      double coverage = cp->GetCharFrequency(cp->SingleByteXOR(tmp, cipher));
+      if (coverage > bestCoverage) {
+         bestCoverage = coverage;
+         bestCipher = cipher;
+         best = cp->SingleByteXOR(tmp, bestCipher);
+      }
+
+      if (coverage > 0.75f) {
+         cout << coverage << "%   " << cp->SingleByteXOR(tmp, cipher) << endl;
+         count++;
+      }
+   }
+   cout << "BEST CANDIDATE " << best << endl;
+
+   cout << "*** Completed test " << test << " ***" << endl;
+
+   cout << "*** Cleaning up for test " << test << "... ***" << endl;
+
+   delete cp;
+   pass = count > 1;
+
+   cout << "# " << test << "............... " << (pass ? "PASS" : "FAIL") << endl;
+   cout << "*** Done cleaning up for test " << test << " ***" << endl << endl;
+
+   return pass;
+}
+
+
 void
 RunTests()
 {
@@ -332,6 +403,7 @@ RunTests()
    tests.push_back(TestFixedXORB());
    tests.push_back(TestFixedXORC());
    tests.push_back(TestSingleByteXOR());
+   tests.push_back(TestXORFile());
 
    for (bool test : tests)
    {

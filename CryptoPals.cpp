@@ -9,6 +9,7 @@ using std::cout;
 using std::endl;
 using std::string;
 using std::vector;
+using std::exception;
 using std::runtime_error;
 
 
@@ -129,7 +130,8 @@ CryptoPals::HexToBase64(const string& in)
          }
          out.push_back('=');
       }
-   } catch (runtime_error& e) {
+   } catch (exception& e) {
+      cout << e.what() << endl;
       throw e;
    }
 
@@ -160,7 +162,8 @@ CryptoPals::FixedXOR(const string& aHex, const string& bHex)
          }
          out.push_back(tmp);
       }
-   } catch (runtime_error& e) {
+   } catch (exception& e) {
+      cout << e.what() << endl;
       throw e;
    }
 
@@ -187,7 +190,8 @@ CryptoPals::SingleByteXOR(const string& str, const unsigned char& key)
          }
          out.push_back(tmp);
       }
-   } catch (runtime_error& e) {
+   } catch (exception& e) {
+      cout << e.what() << endl;
       throw e;
    }
 
@@ -214,20 +218,17 @@ CryptoPals::GetCharFrequency(const string& str)
 unsigned char
 CryptoPals::ScoreText(const string& str)
 {
-   const string letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                          "abcdefghijklmnopqrstuvwxyz";
-
-   double maxCoverage = 0.0f;
-   int index;
-   for (int i = 0; i < letters.size(); ++i)
+   double bestCoverage = 0.0f;
+   unsigned char best;
+   for (unsigned char c = 0; c < 255; ++c)
    {
-      string out = SingleByteXOR(str, letters[i]);
+      string out = SingleByteXOR(str, c);
       double coverage = GetCharFrequency(out);
-      if (coverage > maxCoverage) {
-         maxCoverage = coverage;
-         index = i;
+      if (coverage > bestCoverage) {
+         bestCoverage = coverage;
+         best = c;
       }
    }
 
-   return letters[index];
+   return best;
 }
