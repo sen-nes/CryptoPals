@@ -160,6 +160,37 @@ CryptoPals::HexToBase64(const string& in)
    return out;
 }
 
+
+string
+CryptoPals::Base64Decode(const string& str)
+{
+   if (str.size() % 4 != 0) {
+      throw runtime_error("Invalid input string size.");
+   }
+
+   // TODO: Turn into a static variable
+   const string base64Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                              "abcdefghijklmnopqrstuvwxyz"
+                              "0123456789+/";
+
+   string out;
+   out.reserve(str.size() * 0.75f);
+   for (int i = 3; i < str.size(); i += 4)
+   {
+      // TODO: Handle '=' correctly
+      unsigned char a = base64Chars.find(str[i - 3]);
+      unsigned char b = base64Chars.find(str[i - 2]);
+      unsigned char c = base64Chars.find(str[i - 1]);
+      unsigned char d = base64Chars.find(str[i]);
+
+      out.push_back(a << 2 | b >> 4);
+      out.push_back((b & 15) << 4 | c >> 2);
+      out.push_back((c & 3) << 6 | d);
+   }
+
+   return out;
+}
+
 string
 CryptoPals::FixedXOR(const string& aHex, const string& bHex)
 {
@@ -173,16 +204,8 @@ CryptoPals::FixedXOR(const string& aHex, const string& bHex)
       string b = HexDecode(bHex);
       for (int i = 0; i < a.size(); ++i)
       {
-         unsigned char mask = 1;
-         unsigned char tmp = 0;
-         for (int bit = 0; bit < 8; ++bit)
-         {
-            if ((a[i] & mask) != (b[i] & mask)) {
-               tmp = tmp | mask;
-            }
-            mask = mask << 1;
-         }
-         out.push_back(tmp);
+         unsigned char r = FixedXOR(a[i], b[i]);
+         out.push_back(r);
       }
    } catch (const exception& e) {
       cout << e.what() << endl;
@@ -190,6 +213,24 @@ CryptoPals::FixedXOR(const string& aHex, const string& bHex)
    }
 
    return out;
+}
+
+
+unsigned char
+CryptoPals::FixedXOR(const unsigned char& one, const unsigned char& other)
+{
+   unsigned char mask = 1;
+   unsigned char r = 0;
+
+   for (int bit = 0; bit < 8; ++bit)
+   {
+      if ((one & mask) != (other & mask)) {
+         r = r | mask;
+      }
+      mask = mask << 1;
+   }
+
+   return r;
 }
 
 
@@ -253,4 +294,24 @@ CryptoPals::ScoreText(const string& str)
    }
 
    return best;
+}
+
+
+string
+CryptoPals::RepeatingKeyXOR(const string& str, const string& key)
+{
+   string out;
+   out.reserve(str.size());
+
+   size_t keySize = key.size();
+   size_t ik = 0;
+   for (int is = 0; is < str.size(); ++is)
+   {
+      unsigned char r = FixedXOR(str[is], key[ik]);
+      out.push_back(r);
+
+      ik = (ik + 1) % keySize;
+   }
+
+   return out;
 }

@@ -468,6 +468,125 @@ TestHexDecodeInvalidCharacter()
    return pass;
 }
 
+
+bool
+TestRepeatingKeyXOREncode()
+{
+   string test = "TestRepeatingKeyXOREncode";
+   bool pass = false;
+
+   cout << "*** Preparing for test " << test << "... ***" << endl;
+
+   CryptoPals *cp = new CryptoPals();
+   string expected = "0b3637272a2b2e63622c2e69692a23693a2a3c6324202d623d63343c2a2622632427276527"
+                     "2a282b2f20430a652e2c652a3124333a653e2b2027630c692b20283165286326302e27282f";
+   string in = "Burning 'em, if you ain't quick and nimble\nI go crazy when I hear a cymbal";
+   string key = "ICE";
+   cout << "IN       " << in << endl;
+   cout << "KEY      " << key << endl;
+
+   cout << "*** Done preparing for test " << test << " ***" << endl;
+
+   cout << "*** Running test " << test << "... ***" << endl;
+
+   string outRaw = cp->RepeatingKeyXOR(in, key);
+   string out = cp->HexEncode(outRaw);
+
+   cout << "OUT      " << out << endl;
+   cout << "EXPECTED " << expected << endl;
+
+   cout << "*** Completed test " << test << " ***" << endl;
+
+   cout << "*** Cleaning up for test " << test << "... ***" << endl;
+
+   delete cp;
+   pass = expected.compare(out) == 0;
+
+   cout << "# " << test << "............... " << (pass ? "PASS" : "FAIL") << endl;
+   cout << "*** Done cleaning up for test " << test << " ***" << endl << endl;
+
+   return pass;
+}
+
+
+bool
+TestRepeatingKeyXORDecode()
+{
+   string test = "TestRepeatingKeyXORDecode";
+   bool pass = false;
+
+   cout << "*** Preparing for test " << test << "... ***" << endl;
+
+   CryptoPals *cp = new CryptoPals();
+   string expected = "Burning 'em, if you ain't quick and nimble\nI go crazy when I hear a cymbal";
+   string in = "0b3637272a2b2e63622c2e69692a23693a2a3c6324202d623d63343c2a2622632427276527"
+                     "2a282b2f20430a652e2c652a3124333a653e2b2027630c692b20283165286326302e27282f";
+   string key = "ICE";
+   cout << "IN       " << in << endl;
+   cout << "KEY      " << key << endl;
+
+   cout << "*** Done preparing for test " << test << " ***" << endl;
+
+   cout << "*** Running test " << test << "... ***" << endl;
+
+   string inDec = cp->HexDecode(in);
+   string out = cp->RepeatingKeyXOR(inDec, key);
+
+   cout << "OUT      " << out << endl;
+   cout << "EXPECTED " << expected << endl;
+
+   cout << "*** Completed test " << test << " ***" << endl;
+
+   cout << "*** Cleaning up for test " << test << "... ***" << endl;
+
+   delete cp;
+   pass = expected.compare(out) == 0;
+
+   cout << "# " << test << "............... " << (pass ? "PASS" : "FAIL") << endl;
+   cout << "*** Done cleaning up for test " << test << " ***" << endl << endl;
+
+   return pass;
+}
+
+
+bool
+TestBase64Decode()
+{
+   string test = "TestBase64Decode";
+   bool pass = false;
+
+   cout << "*** Preparing for test " << test << "... ***" << endl;
+
+   CryptoPals *cp = new CryptoPals();
+   string expected = "49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d";
+   string in = "SSdtIGtpbGxpbmcgeW91ciBicmFpbiBsaWtlIGEgcG9pc29ub3VzIG11c2hyb29t";
+
+   cout << "IN       " << in << endl;
+
+   cout << "*** Done preparing for test " << test << " ***" << endl;
+
+   cout << "*** Running test " << test << "... ***" << endl;
+
+   string outRaw = cp->Base64Decode(in);
+   string out = cp->HexEncode(outRaw);
+   cout << "OUT      " << out << endl;
+   cout << "EXPECTED " << expected << endl;
+
+   pass = expected.compare(out) == 0;
+
+   cout << "*** Completed test " << test << " ***" << endl;
+
+   cout << "*** Cleaning up for test " << test << "... ***" << endl;
+
+   delete cp;
+
+   cout << "# " << test << "............... " << (pass ? "PASS" : "FAIL") << endl;
+   cout << "*** Done cleaning up for test " << test << " ***" << endl << endl;
+
+   return pass;
+}
+
+
 void
 RunTests()
 {
@@ -482,9 +601,12 @@ RunTests()
    tests.push_back(TestFixedXORB());
    tests.push_back(TestFixedXORC());
    tests.push_back(TestSingleByteXOR());
-   // tests.push_back(TestXORFile());
+   tests.push_back(TestXORFile());
    tests.push_back(TestHexDecodeInvalidLength());
    tests.push_back(TestHexDecodeInvalidCharacter());
+   tests.push_back(TestRepeatingKeyXOREncode());
+   tests.push_back(TestRepeatingKeyXORDecode());
+   tests.push_back(TestBase64Decode());
 
    for (bool test : tests)
    {
