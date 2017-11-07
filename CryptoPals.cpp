@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <exception>
+#include <stdexcept>
 
 using std::cout;
 using std::endl;
@@ -23,6 +24,25 @@ CryptoPals::ToUpper(const string& str)
       unsigned char c = str[i];
       if (c >= 97 && c <= 122) {
          c -= 32;
+      }
+
+      out.push_back(c);
+   }
+
+   return out;
+}
+
+
+string
+CryptoPals::ToLower(const string& str)
+{
+   string out;
+   out.reserve(str.size());
+   for (int i = 0; i < str.size(); i++)
+   {
+      unsigned char c = str[i];
+      if (c >= 65 && c <= 90) {
+         c += 32;
       }
 
       out.push_back(c);
@@ -55,20 +75,22 @@ CryptoPals::HexDecode(const string& in)
 {
    if (in.size() % 2 != 0)
    {
-      throw new runtime_error("Invalid hex string length.");
+      throw runtime_error("Invalid hex string length.");
    }
 
    string hex;
    hex.reserve(in.size());
-   for (int i = 0; i < in.size(); ++i)
+   string lowerIn = ToLower(in);
+   for (int i = 0; i < lowerIn.size(); ++i)
    {
-      unsigned char c = in[i];
+      unsigned char c = lowerIn[i];
       c -= 48;
       if (c > 9) {
-         c -= 7;
-         if (c > 15) {
-            c -= 32;
-         }
+         c -= 39;
+      }
+
+      if (c > 15 || c < 0) {
+         throw runtime_error("Hex string contains invalid characters.");
       }
 
       hex.push_back(c);
@@ -130,7 +152,7 @@ CryptoPals::HexToBase64(const string& in)
          }
          out.push_back('=');
       }
-   } catch (exception& e) {
+   } catch (const exception& e) {
       cout << e.what() << endl;
       throw e;
    }
@@ -143,7 +165,7 @@ CryptoPals::FixedXOR(const string& aHex, const string& bHex)
 {
    string out;
    if (aHex.size() != bHex.size()) {
-      throw new runtime_error("Incompatible string sizes.");
+      throw runtime_error("Incompatible string sizes.");
    }
 
    try {
@@ -162,7 +184,7 @@ CryptoPals::FixedXOR(const string& aHex, const string& bHex)
          }
          out.push_back(tmp);
       }
-   } catch (exception& e) {
+   } catch (const exception& e) {
       cout << e.what() << endl;
       throw e;
    }
@@ -190,7 +212,7 @@ CryptoPals::SingleByteXOR(const string& str, const unsigned char& key)
          }
          out.push_back(tmp);
       }
-   } catch (exception& e) {
+   } catch (const exception& e) {
       cout << e.what() << endl;
       throw e;
    }

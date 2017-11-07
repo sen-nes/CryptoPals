@@ -9,6 +9,7 @@ public:
    CryptoPals() {}
 
    std::string ToUpper(const std::string&);
+   std::string ToLower(const std::string&);
    std::string HexEncode(const std::string&);
    std::string HexDecode(const std::string&);
    std::string HexToBase64(const std::string&);

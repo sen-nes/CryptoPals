@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 #include <exception>
+#include <stdexcept>
 #include <fstream>
 #include <sstream>
 
@@ -13,6 +14,7 @@ using std::cout;
 using std::endl;
 using std::string;
 using std::vector;
+using std::exception;
 using std::runtime_error;
 using std::ifstream;
 using std::ios;
@@ -57,7 +59,7 @@ TestToUpper()
 
 
 bool
-TestHexEncoding()
+TestHexEncode()
 {
    string test = "TestHexEncoding";
    bool pass = false;
@@ -93,7 +95,7 @@ TestHexEncoding()
 
 
 bool
-TestHexDecoding()
+TestHexDecode()
 {
    string test = "TestHexDecoding";
    bool pass = false;
@@ -389,6 +391,83 @@ bool TestXORFile()
 }
 
 
+bool
+TestHexDecodeInvalidLength()
+{
+   string test = "TestHexDecodeInvalidLength";
+   bool pass = false;
+
+   cout << "*** Preparing for test " << test << "... ***" << endl;
+
+   CryptoPals *cp = new CryptoPals();
+   string expected = "EXCEPTION";
+   string in = "4A75727261736963205061726";
+   cout << "IN       " << in << endl;
+
+   cout << "*** Done preparing for test " << test << " ***" << endl;
+
+   cout << "*** Running test " << test << "... ***" << endl;
+
+   try {
+      string out = cp->HexDecode(in);
+      cout << "OUT      " << out << endl;
+      cout << "EXPECTED " << expected << endl;
+   } catch(const exception& e) {
+      cout << "EXCEPTION " << e.what() << endl;
+      pass = true;
+   }
+
+   cout << "*** Completed test " << test << " ***" << endl;
+
+   cout << "*** Cleaning up for test " << test << "... ***" << endl;
+
+   delete cp;
+
+   cout << "# " << test << "............... " << (pass ? "PASS" : "FAIL") << endl;
+   cout << "*** Done cleaning up for test " << test << " ***" << endl << endl;
+
+   return pass;
+}
+
+
+bool
+TestHexDecodeInvalidCharacter()
+{
+   string test = "TestHexDecodeInvalidCharacter";
+   bool pass = false;
+
+   cout << "*** Preparing for test " << test << "... ***" << endl;
+
+   CryptoPals *cp = new CryptoPals();
+   string expected = "EXCEPTION";
+   string in = "4A757272v1736963205061726W";
+   cout << "IN       " << in << endl;
+
+   cout << "*** Done preparing for test " << test << " ***" << endl;
+
+   cout << "*** Running test " << test << "... ***" << endl;
+
+   try {
+      string out = cp->HexDecode(in);
+      cout << "OUT      " << out << endl;
+      cout << "EXPECTED " << expected << endl;
+   } catch(const exception& e) {
+      cout << "EXCEPTION " << e.what() << endl;
+      pass = true;
+   }
+
+   cout << "*** Completed test " << test << " ***" << endl;
+
+   cout << "*** Cleaning up for test " << test << "... ***" << endl;
+
+   delete cp;
+
+   cout << "# " << test << "............... " << (pass ? "PASS" : "FAIL") << endl;
+   cout << "*** Done cleaning up for test " << test << " ***" << endl << endl;
+
+   return pass;
+}
+
 void
 RunTests()
 {
@@ -396,14 +475,16 @@ RunTests()
    int success = 0;
 
    tests.push_back(TestToUpper());
-   tests.push_back(TestHexEncoding());
-   tests.push_back(TestHexDecoding());
+   tests.push_back(TestHexEncode());
+   tests.push_back(TestHexDecode());
    tests.push_back(TestHexToBase64());
    tests.push_back(TestFixedXORA());
    tests.push_back(TestFixedXORB());
    tests.push_back(TestFixedXORC());
    tests.push_back(TestSingleByteXOR());
-   tests.push_back(TestXORFile());
+   // tests.push_back(TestXORFile());
+   tests.push_back(TestHexDecodeInvalidLength());
+   tests.push_back(TestHexDecodeInvalidCharacter());
 
    for (bool test : tests)
    {
