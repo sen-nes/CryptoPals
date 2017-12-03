@@ -5,6 +5,7 @@
 #include <vector>
 #include <exception>
 #include <stdexcept>
+#include <fstream>
 
 using std::cout;
 using std::endl;
@@ -12,6 +13,14 @@ using std::string;
 using std::vector;
 using std::exception;
 using std::runtime_error;
+using std::ifstream;
+using std::ios;
+using std::istreambuf_iterator;
+
+const string CryptoPals::HEX =    "0123456789abcdef";
+const string CryptoPals::BASE64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                                  "abcdefghijklmnopqrstuvwxyz"
+                                  "0123456789+/";
 
 
 string
@@ -53,17 +62,15 @@ CryptoPals::ToLower(const string& str)
 
 
 string
-CryptoPals::HexEncode(const string& in)
+CryptoPals::HexEncode(const string& str)
 {
-   const char *hexChars = "0123456789abcdef";
-
    string out;
-   out.reserve(in.size() * 2); // + 1
-   for (int i = 0; i < in.size(); ++i)
+   out.reserve(str.size() * 2); // + 1
+   for (int i = 0; i < str.size(); ++i)
    {
-      const unsigned char c = in[i];
-      out.push_back(hexChars[c >> 4]);
-      out.push_back(hexChars[c & 15]);
+      const unsigned char c = str[i];
+      out.push_back(HEX[c >> 4]);
+      out.push_back(HEX[c & 15]);
    }
 
    return out;
@@ -71,19 +78,19 @@ CryptoPals::HexEncode(const string& in)
 
 
 string
-CryptoPals::HexDecode(const string& in)
+CryptoPals::HexDecode(const string& str)
 {
-   if (in.size() % 2 != 0)
+   if (str.size() % 2 != 0)
    {
       throw runtime_error("Invalid hex string length.");
    }
 
    string hex;
-   hex.reserve(in.size());
-   string lowerIn = ToLower(in);
-   for (int i = 0; i < lowerIn.size(); ++i)
+   hex.reserve(str.size()); // / 2);
+   string lower = ToLower(str);
+   for (int i = 0; i < lower.size(); ++i)
    {
-      unsigned char c = lowerIn[i];
+      unsigned char c = lower[i];
       c -= 48;
       if (c > 9) {
          c -= 39;
@@ -106,55 +113,51 @@ CryptoPals::HexDecode(const string& in)
 }
 
 
+// TODO: Refactor.
 string
-CryptoPals::HexToBase64(const string& in)
+CryptoPals::Base64Encode(const string& str)
 {
-   const char *base64Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                             "abcdefghijklmnopqrstuvwxyz"
-                             "0123456789+/";
+   // TODO:: Research impact of accessing size().
+   size_t len = str.size();
+   // TODO: Reserve space for out.
    string out;
-   try {
-      string hexDecode = HexDecode(in);
-      out.reserve(hexDecode.size() * 1.25f);
-      for (int i = 2; i < hexDecode.size(); i += 3)
-      {
-         const unsigned char a = hexDecode[i - 2];
-         const unsigned char b = hexDecode[i - 1];
-         const unsigned char c = hexDecode[i];
 
-         out.push_back(base64Chars[a >> 2]);
-         out.push_back(base64Chars[((a & 3) << 4) | (b >> 4)]);
-         out.push_back(base64Chars[((b & 15) << 2) | (c >> 6)]);
-         out.push_back(base64Chars[c & 63]);
+   // TODO: Is it required for str to be hex encoded?
+   for (int i = 2; i < len; i += 3)
+   {
+      const unsigned char a = str[i - 2];
+      const unsigned char b = str[i - 1];
+      const unsigned char c = str[i];
+
+      out.push_back(BASE64[a >> 2]);
+      out.push_back(BASE64[((a & 3) << 4) | (b >> 4)]);
+      out.push_back(BASE64[((b & 15) << 2) | (c >> 6)]);
+      out.push_back(BASE64[c & 63]);
+   }
+
+   if (len % 3 != 0) {
+      unsigned char a = 0;
+      unsigned char b = 0;
+      if (str.size() % 3 == 1) {
+         a = str[len - 2];
+         b = str[len - 1];
+      } else {
+         a = str[len - 1];
+         b = 0;
       }
+      const unsigned char c = 0;
 
-      if (hexDecode.size() % 3 != 0) {
-         unsigned char a = 0;
-         unsigned char b = 0;
-         if (hexDecode.size() % 3 == 1) {
-            a = hexDecode[hexDecode.size() - 2];
-            b = hexDecode[hexDecode.size() - 1];
-         } else {
-            a = hexDecode[hexDecode.size() - 1];
-            b = 0;
-         }
-         const unsigned char c = 0;
+      out.push_back(BASE64[a >> 2]);
+      out.push_back(BASE64[((a & 3) << 4) | (b >> 4)]);
 
-         out.push_back(base64Chars[a >> 2]);
-         out.push_back(base64Chars[((a & 3) << 4) | (b >> 4)]);
-
-         unsigned char tmp = (((b & 15) << 2) | (c >> 6));
-         if (tmp != 0)
-         {
-            out.push_back(base64Chars[tmp]);
-         } else {
-            out.push_back('=');
-         }
+      unsigned char tmp = (((b & 15) << 2) | (c >> 6));
+      if (tmp != 0)
+      {
+         out.push_back(BASE64[tmp]);
+      } else {
          out.push_back('=');
       }
-   } catch (const exception& e) {
-      cout << e.what() << endl;
-      throw e;
+      out.push_back('=');
    }
 
    return out;
@@ -168,20 +171,15 @@ CryptoPals::Base64Decode(const string& str)
       throw runtime_error("Invalid input string size.");
    }
 
-   // TODO: Turn into a static variable
-   const string base64Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                              "abcdefghijklmnopqrstuvwxyz"
-                              "0123456789+/";
-
    string out;
    out.reserve(str.size() * 0.75f);
    for (int i = 3; i < str.size(); i += 4)
    {
       // TODO: Handle '=' correctly
-      unsigned char a = base64Chars.find(str[i - 3]);
-      unsigned char b = base64Chars.find(str[i - 2]);
-      unsigned char c = base64Chars.find(str[i - 1]);
-      unsigned char d = base64Chars.find(str[i]);
+      unsigned char a = BASE64.find(str[i - 3]);
+      unsigned char b = BASE64.find(str[i - 2]);
+      unsigned char c = BASE64.find(str[i - 1]);
+      unsigned char d = BASE64.find(str[i]);
 
       out.push_back(a << 2 | b >> 4);
       out.push_back((b & 15) << 4 | c >> 2);
@@ -191,71 +189,76 @@ CryptoPals::Base64Decode(const string& str)
    return out;
 }
 
+
+unsigned char
+CryptoPals::FixedXOR(const unsigned char& first,
+                     const unsigned char& second)
+{
+   unsigned char mask = 1;
+   unsigned char result = 0;
+
+   for (int bit = 0; bit < 8; ++bit)
+   {
+      if ((first & mask) != (second & mask)) {
+         result = result | mask;
+      }
+      mask = mask << 1;
+   }
+
+   return result;
+}
+
+
 string
-CryptoPals::FixedXOR(const string& aHex, const string& bHex)
+CryptoPals::FixedXOR(const string& first,
+                     const string& second)
 {
    string out;
-   if (aHex.size() != bHex.size()) {
+   if (first.size() != second.size()) {
       throw runtime_error("Incompatible string sizes.");
    }
 
-   try {
-      string a = HexDecode(aHex);
-      string b = HexDecode(bHex);
-      for (int i = 0; i < a.size(); ++i)
-      {
-         unsigned char r = FixedXOR(a[i], b[i]);
-         out.push_back(r);
-      }
-   } catch (const exception& e) {
-      cout << e.what() << endl;
-      throw e;
+   for (int i = 0; i < first.size(); ++i)
+   {
+      unsigned char c = FixedXOR(first[i], second[i]);
+      out.push_back(c);
    }
 
    return out;
 }
 
 
-unsigned char
-CryptoPals::FixedXOR(const unsigned char& one, const unsigned char& other)
+// TODO: No point in passing key as a reference.
+string
+CryptoPals::SingleByteXOR(const string& str,
+                          const unsigned char& key)
 {
-   unsigned char mask = 1;
-   unsigned char r = 0;
-
-   for (int bit = 0; bit < 8; ++bit)
+   string out;
+   for (int i = 0; i < str.size(); ++i)
    {
-      if ((one & mask) != (other & mask)) {
-         r = r | mask;
-      }
-      mask = mask << 1;
+      unsigned char c = FixedXOR(str[i], key);
+      out.push_back(c);
    }
 
-   return r;
+   return out;
 }
 
 
 string
-CryptoPals::SingleByteXOR(const string& str, const unsigned char& key)
+CryptoPals::RepeatingKeyXOR(const string& str,
+                            const string& key)
 {
    string out;
-   try {
-      string a = HexDecode(str);
-      for (int i = 0; i < a.size(); ++i)
-      {
-         unsigned char mask = 1;
-         unsigned char tmp = 0;
-         for (int bit = 0; bit < 8; ++bit)
-         {
-            if ((a[i] & mask) != (key & mask)) {
-               tmp = tmp | mask;
-            }
-            mask = mask << 1;
-         }
-         out.push_back(tmp);
-      }
-   } catch (const exception& e) {
-      cout << e.what() << endl;
-      throw e;
+   out.reserve(str.size());
+
+   size_t keySize = key.size();
+   size_t ik = 0;
+   for (int is = 0; is < str.size(); ++is)
+   {
+      unsigned char r = FixedXOR(str[is], key[ik]);
+      out.push_back(r);
+
+      ik = (ik + 1) % keySize;
    }
 
    return out;
@@ -278,6 +281,23 @@ CryptoPals::GetCharFrequency(const string& str)
 }
 
 
+string
+CryptoPals::ReadFile(const string& name,
+                     string& out)
+{
+   string path = "./tmp/" + name;
+   ifstream file;
+   file.open(path.data(), ios::in);
+   if (file.is_open())
+   {
+      out.clear();
+      out = string((istreambuf_iterator<char>(file)),
+                   istreambuf_iterator<char>());
+   }
+   return out;
+}
+
+
 unsigned char
 CryptoPals::ScoreText(const string& str)
 {
@@ -294,24 +314,4 @@ CryptoPals::ScoreText(const string& str)
    }
 
    return best;
-}
-
-
-string
-CryptoPals::RepeatingKeyXOR(const string& str, const string& key)
-{
-   string out;
-   out.reserve(str.size());
-
-   size_t keySize = key.size();
-   size_t ik = 0;
-   for (int is = 0; is < str.size(); ++is)
-   {
-      unsigned char r = FixedXOR(str[is], key[ik]);
-      out.push_back(r);
-
-      ik = (ik + 1) % keySize;
-   }
-
-   return out;
 }

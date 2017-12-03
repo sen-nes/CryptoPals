@@ -20,6 +20,43 @@ using std::ifstream;
 using std::ios;
 using std::istreambuf_iterator;
 using std::istringstream;
+using std::getline;
+
+
+bool
+TestToLower()
+{
+   string test = "TestToLower";
+   bool pass = false;
+
+   cout << "*** Preparing for test " << test << "... ***" << endl;
+
+   CryptoPals *cp = new CryptoPals();
+   string expected = "a1b2c3d4";
+   string in = "A1B2C3D4";
+   cout << "IN       " << in << endl;
+
+   cout << "*** Done preparing for test " << test << " ***" << endl;
+
+   cout << "*** Running test " << test << "... ***" << endl;
+
+   string out = cp->ToLower(in);
+   cout << "OUT      " << out << endl;
+   cout << "EXPECTED " << expected << endl;
+
+   pass = expected.compare(out) == 0;
+
+   cout << "*** Completed test " << test << " ***" << endl;
+
+   cout << "*** Cleaning up for test " << test << "... ***" << endl;
+
+   delete cp;
+
+   cout << "# " << test << "............... " << (pass ? "PASS" : "FAIL") << endl;
+   cout << "*** Done cleaning up for test " << test << " ***" << endl << endl;
+
+   return pass;
+}
 
 
 bool
@@ -131,15 +168,15 @@ TestHexDecode()
 
 
 bool
-TestHexToBase64()
+TestBase64Encode()
 {
-   string test = "TestHexToBase64";
+   string test = "TestBase64Encode";
    bool pass = false;
 
    cout << "*** Preparing for test " << test << "... ***" << endl;
 
    CryptoPals *cp = new CryptoPals();
-   string expected = "SSdtIGtpbGxpbmcgeW91ciBicmFpbiBsaWtlIGEgcG9pc29ub3VzIG11c2hyb29t";
+   string expected = "NDkyNzZkMjA2YjY5NmM2YzY5NmU2NzIwNzk2Zjc1NzIyMDYyNzI2MTY5NmUyMDZjNjk2YjY1MjA2MTIwNzA2ZjY5NzM2ZjZlNmY3NTczMjA2ZDc1NzM2ODcyNmY2ZjZk";
    string in = "49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d";
 
    cout << "IN       " << in << endl;
@@ -148,7 +185,7 @@ TestHexToBase64()
 
    cout << "*** Running test " << test << "... ***" << endl;
 
-   string out = cp->HexToBase64(in);
+   string out = cp->Base64Encode(in);
    cout << "OUT      " << out << endl;
    cout << "EXPECTED " << expected << endl;
 
@@ -165,6 +202,81 @@ TestHexToBase64()
 
    return pass;
 }
+
+
+bool
+TestBase64Decode()
+{
+   string test = "TestBase64Decode";
+   bool pass = false;
+
+   cout << "*** Preparing for test " << test << "... ***" << endl;
+
+   CryptoPals *cp = new CryptoPals();
+   string expected = "49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d";
+   string in = "NDkyNzZkMjA2YjY5NmM2YzY5NmU2NzIwNzk2Zjc1NzIyMDYyNzI2MTY5NmUyMDZjNjk2YjY1MjA2MTIwNzA2ZjY5NzM2ZjZlNmY3NTczMjA2ZDc1NzM2ODcyNmY2ZjZk";
+
+   cout << "IN       " << in << endl;
+
+   cout << "*** Done preparing for test " << test << " ***" << endl;
+
+   cout << "*** Running test " << test << "... ***" << endl;
+
+   string out = cp->Base64Decode(in);
+   cout << "OUT      " << out << endl;
+   cout << "EXPECTED " << expected << endl;
+
+   pass = expected.compare(out) == 0;
+
+   cout << "*** Completed test " << test << " ***" << endl;
+
+   cout << "*** Cleaning up for test " << test << "... ***" << endl;
+
+   delete cp;
+
+   cout << "# " << test << "............... " << (pass ? "PASS" : "FAIL") << endl;
+   cout << "*** Done cleaning up for test " << test << " ***" << endl << endl;
+
+   return pass;
+}
+
+
+// TODO: Implement.
+// bool
+// TestHexToBase64()
+// {
+//    string test = "TestHexToBase64";
+//    bool pass = false;
+
+//    cout << "*** Preparing for test " << test << "... ***" << endl;
+
+//    CryptoPals *cp = new CryptoPals();
+//    string expected = "SSdtIGtpbGxpbmcgeW91ciBicmFpbiBsaWtlIGEgcG9pc29ub3VzIG11c2hyb29t";
+//    string in = "49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d";
+
+//    cout << "IN       " << in << endl;
+
+//    cout << "*** Done preparing for test " << test << " ***" << endl;
+
+//    cout << "*** Running test " << test << "... ***" << endl;
+
+//    string out = cp->Base64Encode(in);
+//    cout << "OUT      " << out << endl;
+//    cout << "EXPECTED " << expected << endl;
+
+//    pass = expected.compare(out) == 0;
+
+//    cout << "*** Completed test " << test << " ***" << endl;
+
+//    cout << "*** Cleaning up for test " << test << "... ***" << endl;
+
+//    delete cp;
+
+//    cout << "# " << test << "............... " << (pass ? "PASS" : "FAIL") << endl;
+//    cout << "*** Done cleaning up for test " << test << " ***" << endl << endl;
+
+//    return pass;
+// }
 
 
 bool
@@ -186,7 +298,8 @@ TestFixedXORA()
 
    cout << "*** Running test " << test << "... ***" << endl;
 
-   string outRaw = cp->FixedXOR(one, other);
+   string outRaw = cp->FixedXOR(cp->HexDecode(one),
+                                cp->HexDecode(other));
    string out = cp->HexEncode(outRaw);
 
    cout << "OUT      " << out << endl;
@@ -226,7 +339,8 @@ TestFixedXORB()
 
    cout << "*** Running test " << test << "... ***" << endl;
 
-   string outRaw = cp->FixedXOR(one, other);
+   string outRaw = cp->FixedXOR(cp->HexDecode(one),
+                                cp->HexDecode(other));
    string out = cp->HexEncode(outRaw);
 
    cout << "OUT      " << out << endl;
@@ -266,7 +380,8 @@ TestFixedXORC()
 
    cout << "*** Running test " << test << "... ***" << endl;
 
-   string outRaw = cp->FixedXOR(one, other);
+   string outRaw = cp->FixedXOR(cp->HexDecode(one),
+                                cp->HexDecode(other));
    string out = cp->HexEncode(outRaw);
 
    cout << "OUT      " << out << endl;
@@ -304,10 +419,13 @@ TestSingleByteXOR()
 
    cout << "*** Running test " << test << "... ***" << endl;
 
-   unsigned char cipher = cp->ScoreText(in);
-   string out = cp->SingleByteXOR(in, cipher);
+   unsigned char cipher = cp->ScoreText(cp->HexDecode(in));
+   string out = cp->SingleByteXOR(cp->HexDecode(in),
+                                  cipher);
 
-   cout << "CIPHER   " << cipher << endl;
+   string tmpCipher;
+   tmpCipher += cipher;
+   cout << "CIPHER   " << cp->HexEncode(tmpCipher) << endl;
    cout << "OUT      " << out << endl;
    cout << "EXPECTED " << expected << endl;
 
@@ -318,71 +436,6 @@ TestSingleByteXOR()
    cout << "*** Cleaning up for test " << test << "... ***" << endl;
 
    delete cp;
-
-   cout << "# " << test << "............... " << (pass ? "PASS" : "FAIL") << endl;
-   cout << "*** Done cleaning up for test " << test << " ***" << endl << endl;
-
-   return pass;
-}
-
-
-bool TestXORFile()
-{
-   string test = "TestXORFile";
-   bool pass = false;
-
-   cout << "*** Preparing for test " << test << "... ***" << endl;
-
-   ifstream file;
-   file.open("./tmp/task4.in", ios::in);
-
-   if(!file)
-   {
-      cout << "Cannot open file." << endl;
-      return false;
-   }
-
-   CryptoPals *cp = new CryptoPals();
-
-   cout << "SCANNING FILE..." << endl;
-   string strings((istreambuf_iterator<char>(file)),
-                  istreambuf_iterator<char>());
-   istringstream iss(strings);
-
-   double bestCoverage = 0.0f;
-   string best;
-   unsigned char bestCipher;
-
-   cout << "*** Done preparing for test " << test << " ***" << endl;
-
-   cout << "*** Running test " << test << "... ***" << endl;
-
-   cout << "PRINTING 75+% COVERAGE" << endl;
-   int count = 0;
-   string tmp;
-   while (getline(iss, tmp))
-   {
-      unsigned char cipher = cp->ScoreText(tmp);
-      double coverage = cp->GetCharFrequency(cp->SingleByteXOR(tmp, cipher));
-      if (coverage > bestCoverage) {
-         bestCoverage = coverage;
-         bestCipher = cipher;
-         best = cp->SingleByteXOR(tmp, bestCipher);
-      }
-
-      if (coverage > 0.75f) {
-         cout << coverage << "%   " << cp->SingleByteXOR(tmp, cipher) << endl;
-         count++;
-      }
-   }
-   cout << "BEST CANDIDATE " << best << endl;
-
-   cout << "*** Completed test " << test << " ***" << endl;
-
-   cout << "*** Cleaning up for test " << test << "... ***" << endl;
-
-   delete cp;
-   pass = count > 1;
 
    cout << "# " << test << "............... " << (pass ? "PASS" : "FAIL") << endl;
    cout << "*** Done cleaning up for test " << test << " ***" << endl << endl;
@@ -489,7 +542,8 @@ TestRepeatingKeyXOREncode()
 
    cout << "*** Running test " << test << "... ***" << endl;
 
-   string outRaw = cp->RepeatingKeyXOR(in, key);
+   string outRaw = cp->RepeatingKeyXOR(in,
+                                       key);
    string out = cp->HexEncode(outRaw);
 
    cout << "OUT      " << out << endl;
@@ -530,7 +584,8 @@ TestRepeatingKeyXORDecode()
    cout << "*** Running test " << test << "... ***" << endl;
 
    string inDec = cp->HexDecode(in);
-   string out = cp->RepeatingKeyXOR(inDec, key);
+   string out = cp->RepeatingKeyXOR(inDec,
+                                    key);
 
    cout << "OUT      " << out << endl;
    cout << "EXPECTED " << expected << endl;
@@ -549,36 +604,39 @@ TestRepeatingKeyXORDecode()
 }
 
 
-bool
-TestBase64Decode()
+bool TestXORFile()
 {
-   string test = "TestBase64Decode";
+   string test = "TestXORFile";
    bool pass = false;
 
    cout << "*** Preparing for test " << test << "... ***" << endl;
 
-   CryptoPals *cp = new CryptoPals();
-   string expected = "49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d";
-   string in = "SSdtIGtpbGxpbmcgeW91ciBicmFpbiBsaWtlIGEgcG9pc29ub3VzIG11c2hyb29t";
-
-   cout << "IN       " << in << endl;
+   CryptoPals cp;
+   cout << "SCANNING FILE..." << endl;
+   string data;
+   cp.ReadFile("task4.in", data);
+   istringstream iss(data);
 
    cout << "*** Done preparing for test " << test << " ***" << endl;
 
    cout << "*** Running test " << test << "... ***" << endl;
 
-   string outRaw = cp->Base64Decode(in);
-   string out = cp->HexEncode(outRaw);
-   cout << "OUT      " << out << endl;
-   cout << "EXPECTED " << expected << endl;
-
-   pass = expected.compare(out) == 0;
+   string tmp;
+   int count = 0;
+   while (getline(iss, tmp))
+   {
+      tmp = cp.HexDecode(tmp);
+      unsigned char cipher = cp.ScoreText(tmp);
+      if (cp.GetCharFrequency(cp.SingleByteXOR(tmp, cipher)) > 0.6f) {
+         cout << cp.SingleByteXOR(tmp, cipher) << endl;
+      }
+      count++;
+   }
+   cout << count << endl;
 
    cout << "*** Completed test " << test << " ***" << endl;
 
    cout << "*** Cleaning up for test " << test << "... ***" << endl;
-
-   delete cp;
 
    cout << "# " << test << "............... " << (pass ? "PASS" : "FAIL") << endl;
    cout << "*** Done cleaning up for test " << test << " ***" << endl << endl;
@@ -587,26 +645,54 @@ TestBase64Decode()
 }
 
 
-void
+void Test()
+{
+   CryptoPals cp;
+   string data;
+   cp.ReadFile("task6.in", data);
+   istringstream iss(data);
+   string line;
+   while (getline(iss, line))
+   {
+      line = cp.Base64Decode(line);
+      unsigned char key = cp.ScoreText(line);
+      cout << cp.SingleByteXOR(line, key) << endl;
+   }
+}
+
+bool
 RunTests()
 {
    vector<bool> tests;
    int success = 0;
 
-   tests.push_back(TestToUpper());
-   tests.push_back(TestHexEncode());
-   tests.push_back(TestHexDecode());
-   tests.push_back(TestHexToBase64());
-   tests.push_back(TestFixedXORA());
-   tests.push_back(TestFixedXORB());
-   tests.push_back(TestFixedXORC());
-   tests.push_back(TestSingleByteXOR());
-   tests.push_back(TestXORFile());
-   tests.push_back(TestHexDecodeInvalidLength());
-   tests.push_back(TestHexDecodeInvalidCharacter());
-   tests.push_back(TestRepeatingKeyXOREncode());
-   tests.push_back(TestRepeatingKeyXORDecode());
-   tests.push_back(TestBase64Decode());
+   try {
+      // tests.push_back(TestToLower());
+      // tests.push_back(TestToUpper());
+      // tests.push_back(TestHexEncode());
+      // tests.push_back(TestHexDecode());
+      // tests.push_back(TestBase64Encode());
+      // tests.push_back(TestBase64Decode());
+      // tests.push_back(TestFixedXORA());
+      // tests.push_back(TestFixedXORB());
+      // tests.push_back(TestFixedXORC());
+      // // TODO: FixedXOR chars.
+      // // TODO: FixedXOR strings.
+      // // TODO: SingleByteXOR proper.
+      // tests.push_back(TestSingleByteXOR());
+      // // TODO: RepeatingKeyXOR.
+      // // TODO: ReadFile.
+      tests.push_back(TestXORFile());
+      // tests.push_back(TestHexDecodeInvalidLength());
+      // tests.push_back(TestHexDecodeInvalidCharacter());
+      // tests.push_back(TestRepeatingKeyXOREncode());
+      // tests.push_back(TestRepeatingKeyXORDecode());
+   } catch (const exception& e) {
+      cout << "====== EXCEPTION ======" << endl;
+      cout << e.what() << endl;
+   }
+
+   // Test();
 
    for (bool test : tests)
    {
@@ -614,4 +700,5 @@ RunTests()
    }
 
    cout << "Success: " << success << " / " << tests.size() << endl;
+   return success == tests.size();
 }
